@@ -1,0 +1,36 @@
+name: Build and Smoke Test
+
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y g++ make
+
+      - name: Compile server and client
+        run: make all
+
+      - name: Start server
+        run: |
+          ./server &
+          echo $! > server.pid
+          sleep 3  # 等待 server 启动
+
+      - name: Run client smoke test
+        run: |
+          ./client &  # 启动客户端发送少量消息
+          sleep 5      # 等待客户端完成
+          kill $(cat server.pid)  # 停掉 server
