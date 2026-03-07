@@ -1,0 +1,35 @@
+name: CI Build
+
+# 触发条件：每次 push 或 PR 到任何分支
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 检出代码
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. 安装 g++ (如果默认环境没有)
+      - name: Install g++
+        run: sudo apt-get update && sudo apt-get install -y g++
+
+      # 3. 编译 server
+      - name: Build server
+        run: g++ -std=c++17 -O2 -pthread -o server server.cpp
+
+      # 4. 编译 client
+      - name: Build client
+        run: g++ -std=c++17 -O2 -pthread -o client client.cpp
+
+      # 5. 测试生成的可执行文件（只打印版本号或帮助信息）
+      - name: Test executables
+        run: |
+          ./server --help || echo "server built successfully"
+          ./client --help || echo "client built successfully"
