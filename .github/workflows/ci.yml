@@ -1,35 +1,31 @@
-name: CI Build
+name: C++ Build CI
 
-# 触发条件：每次 push 或 PR 到任何分支
 on:
   push:
-    branches: [ "**" ]
+    branches: [ master ]
   pull_request:
-    branches: [ "**" ]
+    branches: [ master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 检出代码
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      # 2. 安装 g++ (如果默认环境没有)
-      - name: Install g++
-        run: sudo apt-get update && sudo apt-get install -y g++
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y g++ make nlohmann-json3-dev
 
-      # 3. 编译 server
-      - name: Build server
-        run: g++ -std=c++17 -O2 -pthread -o server server.cpp
+    - name: Build server
+      run: |
+        make server
 
-      # 4. 编译 client
-      - name: Build client
-        run: g++ -std=c++17 -O2 -pthread -o client client.cpp
+    - name: Build client
+      run: |
+        make client
 
-      # 5. 测试生成的可执行文件（只打印版本号或帮助信息）
-      - name: Test executables
-        run: |
-          ./server --help || echo "server built successfully"
-          ./client --help || echo "client built successfully"
+    - name: List artifacts
+      run: ls -l
